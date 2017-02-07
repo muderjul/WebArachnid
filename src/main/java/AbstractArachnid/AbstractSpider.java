@@ -1,3 +1,5 @@
+package AbstractArachnid;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -11,7 +13,7 @@ import java.util.regex.Pattern;
  * An Abstract class that implements a Simple Webcrawler.
  * Provides procedures for Requesting a Webpage by it's link and
  * Filtering all links (by HTML href tag) from a given Webpage.
- *
+ * <p>
  * Created by muderjul on 01.02.2017.
  */
 public abstract class AbstractSpider {
@@ -22,12 +24,13 @@ public abstract class AbstractSpider {
 
     /**
      * Creates a new Webcrawler using the specified UserAgent.
-     * @param start The URLs at which the Webcrawler should start it's journey.
-     * @param depth The maximum distance in Links from the start URL that should be inspected.
+     *
+     * @param start     The URLs at which the Webcrawler should start it's journey.
+     * @param depth     The maximum distance in Links from the start URL that should be inspected.
      * @param userAgent The UserAgent the Webcrawler should use instead of the default one.
      */
-    public AbstractSpider(String[] start, int depth, String userAgent) {
-        for (String link: start) {
+    public AbstractSpider (String[] start, int depth, String userAgent) {
+        for (String link : start) {
             this.queue.addUnseen(new URLHandler(link, 0));
         }
         this.userAgent = userAgent;
@@ -36,11 +39,12 @@ public abstract class AbstractSpider {
 
     /**
      * Creates a new Webcrawler and uses the default UserAgent.
+     *
      * @param depth The maximum distance in Links from the start URL that should be inspected.
      * @param start The URLs at which the Webcrawler should start it's journey.
      */
-    public AbstractSpider(String[] start, int depth) {
-        for (String link: start) {
+    public AbstractSpider (String[] start, int depth) {
+        for (String link : start) {
             this.queue.addUnseen(new URLHandler(link));
         }
         this.userAgent = null;
@@ -48,44 +52,63 @@ public abstract class AbstractSpider {
     }
 
     /**
-     * Filters all Links from a List that should not be Processed by the Webcrawler.
-     * @param links The List of Links to be filtered.
-     * @return A List containing only Links that should be looked at.
-     */
-    protected abstract List<URLHandler> filterLinks(List<URLHandler> links);
-
-    /**
-     * Runs a User Defined routine on the given link.
-     * @param link The Link that is processed.
-     * @param linksOnSite All Links (by href) found on this page AFTER filtering.
-     * @param content The raw HTML found at the position of the Link.
-     */
-    protected abstract void processLink(URLHandler link, List<URLHandler> linksOnSite, String content);
-
-    /**
      * Checks if a Link has already been seen. (Reduces exposure to inheriting classes.)
+     *
      * @param link The Link to be checked.
      * @return True if the Link has been seen, false otherwise.
      */
-    protected boolean isSeen(URLHandler link) {
+    protected boolean isSeen (URLHandler link) {
         return this.queue.isSeen(link);
     }
 
     /**
      * Checks if a Link is currently Queued. (Reduces exposure to inheriting classes.)
+     *
      * @param link The Link to be checked.
      * @return True if the Links is queued, false otherwise. Also returns false if the Link has already been seen.
      */
-    protected boolean isUnseen(URLHandler link) {
+    protected boolean isUnseen (URLHandler link) {
         return this.queue.isUnseen(link);
     }
 
     /**
+     * @return Returns the Depth at which the Spider should stop.
+     */
+    protected int getDepth () {
+        return this.depth;
+    }
+
+    /**
+     * Starts the routine of the Webcrawler.
+     * Terminates when no more Links can be found or the specified Depth is reached.
+     */
+    protected void startSpider () {
+        URLHandler currentURL = this.queue.getNext();
+        while (currentURL != null) {
+            if (currentURL.getDepth() >= this.depth) {
+                currentURL = this.queue.getNext();
+                continue;
+            }
+            String page = this.requestURL(currentURL);
+
+            List<URLHandler> foundLinks = this.filterLinks(this.findLinks(page));
+            for (URLHandler link : foundLinks) {
+                link.setDepth(currentURL.getDepth() + 1);
+            }
+            this.queue.addAllUnseen(foundLinks);
+            this.processLink(currentURL, foundLinks, page);
+            this.queue.addSeen(currentURL);
+            currentURL = this.queue.getNext();
+        }
+    }
+
+    /**
      * Requests the HTML code from the given URL.
+     *
      * @param link The URL to be requested.
      * @return The raw HTML of the URL.
      */
-    private String requestURL(URLHandler link) {
+    private String requestURL (URLHandler link) {
         URL target;
         HttpURLConnection connection = null;
         try {
@@ -118,11 +141,20 @@ public abstract class AbstractSpider {
     }
 
     /**
+     * Filters all Links from a List that should not be Processed by the Webcrawler.
+     *
+     * @param links The List of Links to be filtered.
+     * @return A List containing only Links that should be looked at.
+     */
+    protected abstract List<URLHandler> filterLinks (List<URLHandler> links);
+
+    /**
      * Filters all Links (by HTML href-Tag) from a String.
+     *
      * @param content The HTML to be inspected.
      * @return A List of URLHandlers where each Handler contains a Link from the HTML.
      */
-    protected List<URLHandler> findLinks(String content) {
+    protected List<URLHandler> findLinks (String content) {
         Pattern regexp = Pattern.compile("href=[\'\"]?([^\'\" >]+)");
         Matcher matcher = regexp.matcher(content);
         List<URLHandler> links = new ArrayList<URLHandler>();
@@ -135,26 +167,11 @@ public abstract class AbstractSpider {
     }
 
     /**
-     * Starts the routine of the Webcrawler.
-     * Terminates when no more Links can be found or the specified Depth is reached.
+     * Runs a User Defined routine on the given link.
+     *
+     * @param link        The Link that is processed.
+     * @param linksOnSite All Links (by href) found on this page AFTER filtering.
+     * @param content     The raw HTML found at the position of the Link.
      */
-    protected void startSpider() {
-        URLHandler currentURL = this.queue.getNext();
-        while (currentURL != null) {
-            if (currentURL.getDepth() >= this.depth) {
-                currentURL = this.queue.getNext();
-                continue;
-            }
-            String page = this.requestURL(currentURL);
-
-            List<URLHandler> foundLinks = this.filterLinks(this.findLinks(page));
-            for (URLHandler link: foundLinks) {
-                link.setDepth(currentURL.getDepth() + 1);
-            }
-            this.queue.addAllUnseen(foundLinks);
-            this.processLink(currentURL, foundLinks, page);
-            this.queue.addSeen(currentURL);
-            currentURL = this.queue.getNext();
-        }
-    }
+    protected abstract void processLink (URLHandler link, List<URLHandler> linksOnSite, String content);
 }
