@@ -9,6 +9,7 @@ package AbstractArachnid;
 public class URLHandler {
 
     private final String name;
+    private String linkto;
     private int depth;
 
     /**
@@ -17,26 +18,34 @@ public class URLHandler {
      * @param name  The link to the URL this Handler represents.
      * @param depth The Depth of the Link as distance from a Start Link.
      */
-    public URLHandler (String name, int depth) {
-        this.name = name.toLowerCase();
+    public URLHandler (String name, int depth, String linkto) {
+        this.name = name;
         this.depth = depth;
+        this.linkto = linkto;
     }
-
 
     /**
      * Creates a new Handler representing the given URL.
      *
      * @param name The link to the URL this Handler represents.
      */
-    public URLHandler (String name) {
-        this.name = name.toLowerCase();
+    public URLHandler (String name, String linkto) {
+        this.name = name;
         this.depth = -1;
+        this.linkto = linkto;
+    }
+
+    /**
+     * @return The name of the URL saved in this Handler.
+     */
+    public String getName() {
+        return this.name.toLowerCase();
     }
 
     /**
      * @return The URL saved in this Handler.
      */
-    public String getName () {
+    public String getURL() {
         return this.name;
     }
 
@@ -65,5 +74,30 @@ public class URLHandler {
         if (this.depth < 0) {
             this.depth = depth;
         }
+    }
+
+    /**
+     * @return The URL this handler was found on.
+     */
+    public String getLinkto() {
+        return this.linkto;
+    }
+
+    /**
+     * Sets the Linkto of this URL.
+     *
+     * @param linkto The new linkto to be set.
+     */
+    public void setLinkto(String linkto) {
+        this.linkto = linkto;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        URLHandler that = (URLHandler) o;
+        return this.getName().equals(that.getName());
     }
 }

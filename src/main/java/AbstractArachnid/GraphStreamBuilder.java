@@ -20,7 +20,7 @@ public class GraphStreamBuilder implements GraphBuilder {
         graph.addAttribute("ui.quality");
         graph.addAttribute("ui.antialias");
         graph.addAttribute("ui.stylesheet",
-                           "node {\n" + "\tfill-mode: dyn-plain;\n" + "\tfill-color: red, blue, yellow, green;\n" +
+                           "node {\n" + "\tfill-mode: dyn-plain;\n" + "\tfill-color: teal, purple, olive, maroon;\n" +
                                    "\ttext-mode: hidden;\n" + "\tsize-mode: dyn-size;\n" + "\tsize: 10px;\n" + "}\n" +
                                    "\n" + "edge {\n" + "\tshape: line;\n" + "\tfill-mode: dyn-plain;\n" +
                                    "\tfill-color: #000;\n" + "\tarrow-size: 3px, 2px;\n" + "}\n");

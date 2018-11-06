@@ -83,6 +83,9 @@ public class URLQueue {
      * @return The next queued Handler in unseen.
      */
     public URLHandler getNext () {
+        if (this.unseen.isEmpty()) {
+            return null;
+        }
         return this.unseen.remove(0);
     }
 }

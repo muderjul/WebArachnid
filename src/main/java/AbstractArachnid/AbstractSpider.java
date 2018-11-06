@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.Thread.sleep;
+
 /**
  * An Abstract class that implements a Simple Webcrawler.
  * Provides procedures for Requesting a Webpage by it's link and
@@ -31,7 +33,7 @@ public abstract class AbstractSpider {
      */
     public AbstractSpider (String[] start, int depth, String userAgent) {
         for (String link : start) {
-            this.queue.addUnseen(new URLHandler(link, 0));
+            this.queue.addUnseen(new URLHandler(link, 0, ""));
         }
         this.userAgent = userAgent;
         this.depth = depth;
@@ -45,7 +47,7 @@ public abstract class AbstractSpider {
      */
     public AbstractSpider (String[] start, int depth) {
         for (String link : start) {
-            this.queue.addUnseen(new URLHandler(link));
+            this.queue.addUnseen(new URLHandler(link, 0, ""));
         }
         this.userAgent = null;
         this.depth = depth;
@@ -89,11 +91,14 @@ public abstract class AbstractSpider {
                 currentURL = this.queue.getNext();
                 continue;
             }
+
+
             String page = this.requestURL(currentURL);
 
-            List<URLHandler> foundLinks = this.filterLinks(this.findLinks(page));
+            List<URLHandler> foundLinks = this.filterLinks(this.findLinks(page), currentURL);
             for (URLHandler link : foundLinks) {
                 link.setDepth(currentURL.getDepth() + 1);
+                link.setLinkto(currentURL.getName());
             }
             this.queue.addAllUnseen(foundLinks);
             this.processLink(currentURL, foundLinks, page);
@@ -112,7 +117,7 @@ public abstract class AbstractSpider {
         URL target;
         HttpURLConnection connection = null;
         try {
-            target = new URL(link.getName());
+            target = new URL(link.getURL());
             connection = (HttpURLConnection) target.openConnection();
             if (this.userAgent != null) {
                 connection.setRequestProperty("User-Agent", this.userAgent);
@@ -126,12 +131,17 @@ public abstract class AbstractSpider {
                 result.append(line);
             }
             reader.close();
+
+            // sleep(1000);
+
             return result.toString();
 
+        //} catch (InterruptedException ie) {
+        //    return "";
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Connection Failed.");
-            System.err.println(link.getName());
+            System.err.println(link.getURL());
             return "";
         } finally {
             if (connection != null) {
@@ -144,9 +154,10 @@ public abstract class AbstractSpider {
      * Filters all Links from a List that should not be Processed by the Webcrawler.
      *
      * @param links The List of Links to be filtered.
+     * @param currentLink The link that is currently being processed.
      * @return A List containing only Links that should be looked at.
      */
-    protected abstract List<URLHandler> filterLinks (List<URLHandler> links);
+    protected abstract List<URLHandler> filterLinks(List<URLHandler> links, URLHandler currentLink);
 
     /**
      * Filters all Links (by HTML href-Tag) from a String.
@@ -160,7 +171,7 @@ public abstract class AbstractSpider {
         List<URLHandler> links = new ArrayList<URLHandler>();
 
         while (matcher.find()) {
-            links.add(new URLHandler(matcher.group(1)));
+            links.add(new URLHandler(matcher.group(1), ""));
         }
 
         return links;

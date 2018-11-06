@@ -42,11 +42,14 @@ public abstract class GraphSpider extends AbstractSpider {
     @Override
     public void processLink (URLHandler link, List<URLHandler> linksOnSite, String content) {
         this.builder.step();
-        System.out.println(link.getName() + "   " + link.getDepth());
+        System.out.println(link.getURL() + "   " + link.getDepth() + "      " + link.getLinkto());
         this.builder.addNode(link.getName());
+        if (!link.getLinkto().equals("")) {
+            this.builder.addEdge(link.getName(), link.getLinkto());
+        }
         for (URLHandler newLink : linksOnSite) {
             if (newLink.equals(link)) {
-                continue;
+                break;
             }
             this.builder.addNode(link.getName());
             if (!super.isSeen(link) && this.builder.getAttribute(link.getName(), "ui.color") == 0.0) {
@@ -55,7 +58,7 @@ public abstract class GraphSpider extends AbstractSpider {
             }
         }
         if (!super.isSeen(link)) {
-            this.builder.setAttribute(link.getName(), "ui.size", 10 + (super.getDepth() * 3) / (link.getDepth() + 1));
+            this.builder.setAttribute(link.getName(), "ui.size", 5 + (super.getDepth() * 3) / (link.getDepth() + 1));
         }
     }
 }
