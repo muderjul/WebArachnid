@@ -15,16 +15,16 @@ public abstract class GraphSpider extends AbstractSpider {
     private final boolean earlyDisplay;
     private Viewer viewer = null;
 
-    public GraphSpider (String[] start, int depth, String userAgent, boolean earlyDisplay, GraphBuilder builder) {
-        super(start, depth, userAgent);
+    public GraphSpider (String[] start, int depth, String userAgent, int delay, boolean earlyDisplay, GraphBuilder builder) {
+        super(start, depth, userAgent, delay);
         this.builder = builder;
         this.earlyDisplay = earlyDisplay;
     }
 
-    public GraphSpider (String[] start, int depth, boolean earlyDisplay, GraphBuilder builder) {
+    public GraphSpider (String[] start, int depth) {
         super(start, depth);
-        this.builder = builder;
-        this.earlyDisplay = earlyDisplay;
+        this.builder = new GraphStreamBuilder();
+        this.earlyDisplay = true;
     }
 
     @Override

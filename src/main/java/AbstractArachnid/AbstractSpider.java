@@ -23,6 +23,7 @@ public abstract class AbstractSpider {
     private final URLQueue queue = new URLQueue();
     private final String userAgent;
     private final int depth;
+    private final int delay;
 
     /**
      * Creates a new Webcrawler using the specified UserAgent.
@@ -31,12 +32,13 @@ public abstract class AbstractSpider {
      * @param depth     The maximum distance in Links from the start URL that should be inspected.
      * @param userAgent The UserAgent the Webcrawler should use instead of the default one.
      */
-    public AbstractSpider (String[] start, int depth, String userAgent) {
+    public AbstractSpider (String[] start, int depth, String userAgent, int delay) {
         for (String link : start) {
             this.queue.addUnseen(new URLHandler(link, 0, ""));
         }
         this.userAgent = userAgent;
         this.depth = depth;
+        this.delay = delay;
     }
 
     /**
@@ -51,6 +53,7 @@ public abstract class AbstractSpider {
         }
         this.userAgent = null;
         this.depth = depth;
+        this.delay = 0;
     }
 
     /**
@@ -61,16 +64,6 @@ public abstract class AbstractSpider {
      */
     protected boolean isSeen (URLHandler link) {
         return this.queue.isSeen(link);
-    }
-
-    /**
-     * Checks if a Link is currently Queued. (Reduces exposure to inheriting classes.)
-     *
-     * @param link The Link to be checked.
-     * @return True if the Links is queued, false otherwise. Also returns false if the Link has already been seen.
-     */
-    protected boolean isUnseen (URLHandler link) {
-        return this.queue.isUnseen(link);
     }
 
     /**
@@ -132,12 +125,14 @@ public abstract class AbstractSpider {
             }
             reader.close();
 
-            // sleep(1000);
+            sleep(delay);
 
             return result.toString();
 
-        //} catch (InterruptedException ie) {
-        //    return "";
+        } catch (InterruptedException ie) {
+            ie.printStackTrace();
+            System.err.println("Sleep Interrupted.");
+            return "";
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Connection Failed.");

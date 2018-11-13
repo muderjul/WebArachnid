@@ -11,8 +11,8 @@ import java.util.List;
 public class WikiSpider extends GraphSpider {
 
 
-    public WikiSpider(String[] start, int depth, String userAgent, boolean earlyDisplay, GraphBuilder builder) {
-        super(start, depth, userAgent, earlyDisplay, builder);
+    public WikiSpider(String[] start, int depth, String userAgent, int delay, boolean earlyDisplay, GraphBuilder builder) {
+        super(start, depth, userAgent, delay, earlyDisplay, builder);
     }
 
     protected List<URLHandler> filterLinks(List<URLHandler> links, URLHandler currentLink) {
@@ -37,7 +37,7 @@ public class WikiSpider extends GraphSpider {
     public static void main(String[] args) {
         String[] start = {"https://de.wikipedia.org/wiki/Informatik"};
 
-        WikiSpider spider = new WikiSpider(start, 7, "RandomWebcrawler", true, new GraphStreamBuilder());
+        WikiSpider spider = new WikiSpider(start, 3, "RandomWebcrawler", 2000, true, new GraphStreamBuilder());
         spider.startSpider();
     }
 }

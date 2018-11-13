@@ -68,16 +68,6 @@ public class URLQueue {
     }
 
     /**
-     * Checks if a Handler is contained in the unseen List.
-     *
-     * @param handler The Handler to be checked.
-     * @return True if the Handler if contained in unseen, False otherwise.
-     */
-    public boolean isUnseen (URLHandler handler) {
-        return this.unseen.contains(handler);
-    }
-
-    /**
      * Gets the next queued Handler in unseen and removes it from unseen.
      *
      * @return The next queued Handler in unseen.
