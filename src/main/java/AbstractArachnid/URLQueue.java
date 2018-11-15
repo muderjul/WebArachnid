@@ -49,7 +49,6 @@ public class URLQueue {
      * @param handlers The Collection of Handlers to be added.
      */
     public void addAllUnseen (Collection<URLHandler> handlers) {
-        // BFS
         for (URLHandler handler : handlers) {
             this.addUnseen(handler);
         }
@@ -63,7 +62,11 @@ public class URLQueue {
      */
     public void addUnseen (URLHandler handler) {
         if (!this.seen.contains(handler) && !this.unseen.contains(handler)) {
+            // BFS
             this.unseen.add(handler);
+
+            //DFS
+            //this.unseen.add(0, handler);
         }
     }
 
